@@ -1,5 +1,6 @@
 package com.ramexchange.ramexchange.service;
 
+import com.ramexchange.ramexchange.dto.request.LoginRequest;
 import com.ramexchange.ramexchange.dto.request.RegisterRequest;
 import com.ramexchange.ramexchange.dto.response.AuthResponse;
 import com.ramexchange.ramexchange.model.User;
@@ -34,6 +35,31 @@ public class AuthService {
                 .id(savedUser.getId())
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
+                .build();
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return AuthResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
+    }
+
+    public AuthResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+
+        return AuthResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
                 .build();
     }
 }
